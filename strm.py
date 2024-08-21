@@ -111,7 +111,7 @@ def app():
         if file1 is not None:
             try:
                 bytes_data = file1.getvalue()
-                df1 = pd.read_excel(bytes_data, sheet_name='5W_Enrollment', skiprows=2, engine='openpyxl')
+                df1 = pd.read_excel(bytes_data, sheet_name='5W_Enrollment', skiprows=2)
                 df1 = df1.dropna(subset=['Facility ID'])
 
                 # Cleaned and structured dataframes
