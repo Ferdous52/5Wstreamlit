@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import openpyxl
 
 st.set_page_config()
 
@@ -102,7 +103,8 @@ def app():
         st.write("## 5W Analysis")
 
         # File uploader for a single Excel file
-        file1 = st.file_uploader("Upload the 5W data", type=["xlsx"], key="file_analysis")
+        file1 = st.file_uploader("Upload the 5W data", type=["xlsx"], key="file_analysis").read()
+
 
         if file1 is not None:
             try:
