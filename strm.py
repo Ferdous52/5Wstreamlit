@@ -83,12 +83,15 @@ def app():
     if option == "5W data Comparison":
         st.write("## 5W Data Comparison")
 
+
+
         # File uploader for two Excel files
         file1 = st.file_uploader("Upload the first 5W data file", type=["xlsx"], key="file1")
         file2 = st.file_uploader("Upload the second 5W data file", type=["xlsx"], key="file2")
 
         if file1 and file2:
             try:
+
                 df1 = pd.read_excel(file1, sheet_name='5W_Enrollment', skiprows=2, engine='openpyxl')
                 df2 = pd.read_excel(file2, sheet_name='5W_Enrollment', skiprows=2, engine='openpyxl')
 
@@ -107,7 +110,8 @@ def app():
 
         if file1 is not None:
             try:
-                df1 = pd.read_excel(file1, sheet_name='5W_Enrollment', skiprows=2, engine='openpyxl')
+                bytes_data = file1.getvalue()
+                df1 = pd.read_excel(bytes_data, sheet_name='5W_Enrollment', skiprows=2, engine='openpyxl')
                 df1 = df1.dropna(subset=['Facility ID'])
 
                 # Cleaned and structured dataframes
