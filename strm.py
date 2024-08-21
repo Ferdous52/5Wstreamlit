@@ -105,7 +105,7 @@ def app():
         st.write("## 5W Analysis")
 
         # File uploader for a single Excel file
-        file1 = st.file_uploader("Upload the 5W data", type=["xlsx"])
+        file1 = st.file_uploader("Upload the 5W data")
 
 
         if file1 is not None:
