@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+#from st_aggrid import AgGrid as ag
 
 st.set_page_config()
 
@@ -56,7 +57,7 @@ def login():
                              label_visibility="collapsed", help="Enter your password here")
 
     if st.button("Login", help="Click to login", use_container_width=True, key="login_button"):
-        if username == "ferdous" and password == "123":
+        if username == "dipu" and password == "2580":
             st.session_state.logged_in = True
         else:
             st.error("Invalid username or password. Please try again.")
@@ -91,10 +92,16 @@ def app():
 
         if file1 and file2:
             try:
-
+                st.write("Previous Month 5W")
                 df1 = pd.read_excel(file1, sheet_name='5W_Enrollment', skiprows=2, engine='openpyxl')
+                df1 = df1.dropna(subset=['Facility ID'])
+                with st.expander("Show the data"):
+                    st.dataframe(df1)
+                st.write("Current Month 5W")
                 df2 = pd.read_excel(file2, sheet_name='5W_Enrollment', skiprows=2, engine='openpyxl')
-
+                df2 = df2.dropna(subset=['Facility ID'])
+                with st.expander("Show the data"):
+                    st.dataframe(df2)
                 # Add your comparison logic here
 
                 st.success("Files uploaded successfully. Ready for comparison.")
