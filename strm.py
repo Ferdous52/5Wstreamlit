@@ -87,8 +87,8 @@ def app():
 
 
         # File uploader for two Excel files
-        file1 = st.file_uploader("Upload the first 5W data file", type=["xlsx"], key="file1")
-        file2 = st.file_uploader("Upload the second 5W data file", type=["xlsx"], key="file2")
+        file1 = st.file_uploader("Upload the Previous Month 5W data file", type=["xlsx"], key="file1")
+        file2 = st.file_uploader("Upload the Current Month 5W data file", type=["xlsx"], key="file2")
 
         if file1 and file2:
             try:
