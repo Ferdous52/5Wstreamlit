@@ -78,7 +78,7 @@ def app():
         logout()
 
     # Option to select between 5W data comparison and 5W analysis
-    st.write("### Select an Option")
+
     option = st.selectbox("", ["Select an option", "5W data Comparison", "5W analysis"])
 
     if option == "5W data Comparison":
@@ -102,9 +102,35 @@ def app():
                 df2 = df2.dropna(subset=['Facility ID'])
                 with st.expander("Show the data"):
                     st.dataframe(df2)
-                # Add your comparison logic here
 
-                st.success("Files uploaded successfully. Ready for comparison.")
+                # Columns to compare
+                comparison_columns = ['Camp/Union', 'Facility ID', 'Facility Type', 'Intervention']
+                enroll_columns = ['# of Girls (Including CwD)', '# of Girls with Disability',
+                                      '# of Boys (Including CwD)', '# of Boys with Disability', 'Total']
+
+                 # Filter dataframes by comparison columns and enrollment columns
+                df1_filtered = df1[comparison_columns + enroll_columns]
+                df2_filtered = df2[comparison_columns + enroll_columns]
+
+                # Merge the two dataframes on the comparison columns
+                merged_df = pd.merge(df1_filtered, df2_filtered, on=comparison_columns, how='outer',
+                                         suffixes=('_prev', '_curr'))
+
+                # Calculate differences for numeric columns
+                for col in enroll_columns:
+                    merged_df[f'{col}_diff'] = merged_df[f'{col}_curr'] - merged_df[f'{col}_prev']
+
+                # Filter the dataframe to show only rows with differences
+                diff_df = merged_df[(merged_df[[f'{col}_diff' for col in enroll_columns]] != 0).any(axis=1)]
+
+                # Display results
+                st.write("### Enrollment Differences")
+                if not diff_df.empty:
+                    st.dataframe(diff_df)
+                else:
+                    st.write("No differences found in the numeric enrollment data.")
+
+
             except Exception as e:
                 st.error(f"Error reading files: {e}")
 
@@ -121,7 +147,7 @@ def app():
                 df1 = pd.read_excel(file1, sheet_name='5W_Enrollment', skiprows=2)
                 df1 = df1.dropna(subset=['Facility ID'])
 
-                # Cleaned and structured dataframes
+                # Cleaned and structured dataframes for 5W Analysis
                 Facility_info = df1[['Camp/Union', 'Block Name/ Ward for Host', 'Latitude', 'Longitude', 'Sub-Block',
                                      'Facility Name', 'Facility ID', 'Facility Type', 'Intervention']]
 
@@ -136,7 +162,7 @@ def app():
                                   '# of Boys with Disability',
                                   'Total', ]]
 
-                Attendance = df1[['Camp/Union', 'Facility Name', 'Facility ID', 'Facility Type', 'Intervention',
+                Attendance = df1[['Camp/Union', 'Facility Name', 'Facility ID', 'Facility Type', 'Intervention','Shift',
                                   '# of Girls Attended_Reg',
                                   '# of Boys Attended_Reg',
                                   'Total Attended_Reg',
@@ -209,80 +235,180 @@ def app():
 
                 # Facility Information Section
                 st.write("## Facility Information")
-                with st.expander("Show Facility Information"):
-                    st.dataframe(Facility_info)
+                with st.expander("Show the data"):
+                    #st.dataframe(Facility_info)
 
-                # Pivot Table Section
-                pivot_table1 = pd.pivot_table(
-                    Facility_info,
-                    values='Facility ID',
-                    index='Camp/Union',
-                    columns=['Facility Type'],
-                    aggfunc='nunique',
-                    fill_value=0,
-                    margins=True,
-                    margins_name='Total')
+                    # Pivot Table1  Section
+                    pivot_table1 = pd.pivot_table(
+                        Facility_info,
+                        values='Facility ID',
+                        index='Camp/Union',
+                        columns=['Facility Type'],
+                        aggfunc='nunique',
+                        fill_value=0,
+                        margins=True,
+                        margins_name='Total')
+                    st.dataframe(pivot_table1.style.format("{:.0f}"),use_container_width=True)
 
-                st.dataframe(pivot_table1, use_container_width=True)
+                    # Pivot Table3  Section
+                    st.write("#### Number of Facility  wise Intervention")
+                    pivot_table3 = pd.pivot_table(
+                        Facility_info,
+                        values='Facility ID',
+                        index='Intervention',
+                        columns=['Facility Type'],
+                        aggfunc='nunique',
+                        fill_value=0,
+                        margins=True,
+                        margins_name='Total')
+                    st.dataframe(pivot_table3,height=530,use_container_width= True)
 
-                st.write("#### Camp-wise Facility Type")
-                pivot_table2 = pd.pivot_table(
-                    Facility_info,
-                    values='Facility ID',
-                    index='Camp/Union',
-                    columns=['Intervention'],
-                    aggfunc='nunique',
-                    fill_value=0,
-                    margins=True,
-                    margins_name='Total')
+                    # Create the pivot table
+                    Facility_info['Facility Type'] = Facility_info['Facility Type'].replace({
+                        'Learning Centre': 'LC',
+                        'Community Based Learning Facility': 'CBLF'
+                    })
+                    pivot_table4 = pd.pivot_table(
+                        Facility_info,
+                        values='Facility ID',
+                        index=['Facility Type', 'Intervention'],
+                        columns='Camp/Union',
+                        aggfunc='nunique',
+                        fill_value=0,
+                        margins=True,
+                        margins_name='Total'
+                    )
+                    st.write("### Total Facility Information")
+                    st.dataframe(pivot_table4.style.format("{:.0f}"),height=702,use_container_width=True)
 
-                st.dataframe(pivot_table2, use_container_width=True)
-                st.write("#### Number of Intervention wise Facility")
-                pivot_table3 = pd.pivot_table(
-                    Facility_info,
-                    values='Facility ID',
-                    index='Intervention',
-                    columns=['Facility Type'],
-                    aggfunc='nunique',
-                    fill_value=0,
-                    margins=True,
-                    margins_name='Total')
 
-                st.dataframe(pivot_table3, use_container_width=True, height=530)
+                st.write("## Enrollment")
 
-                # User selects a variable to analyze
-                st.write("##### Select a variable to analyze")
-                selected_variable = st.selectbox("", list(variables_dict.keys()))
+                with st.expander("Show the data"):
+                     Enrollment = Enrollment.rename(columns={'Camp/Union': 'Camp',
+                                                             '# of Girls (Including CwD)':'Girls (Including CwD)',
+                                                             '# of Girls with Disability':'Girls with Disability',
+                                                             '# of Boys (Including CwD)':'Boys (Including CwD)',
+                                                             '# of Boys with Disability': 'Boys with Disability'
+                                                             })
+                     pivot_enroll = pd.pivot_table(
+                        Enrollment,
+                        values=['Girls (Including CwD)',
+                                  'Girls with Disability',
+                                  'Boys (Including CwD)',
+                                  'Boys with Disability',
+                                  'Total'],
+                        index='Camp',
+                        aggfunc='sum',
+                        fill_value=0,
+                        margins=True,
+                        margins_name='Total')
+                     st.dataframe(pivot_enroll, height=300)
 
-                if selected_variable:
-                    #st.write(f"### Data of {selected_variable}")
-                    selected_df = variables_dict[selected_variable]
+                st.write("## Attendance")
 
-                    # Hidden DataFrame for the selected variable
-                    with st.expander(f"Show {selected_variable} Data"):
-                        st.dataframe(selected_df)
+                with st.expander("Show the data"):
+                    Attendance = Attendance.rename(columns={'Camp/Union': 'Camp',
+                                                            '# of Girls Attended_Reg': 'Girls Attended_Reg',
+                                                            '# of Boys Attended_Reg': 'Boys Attended_Reg',
+                                                            'Total Attended_Reg': 'Total Attended_Reg',
+                                                            '# of Girls Attended_Irreg': 'Girls Attended_Irreg',
+                                                            '# of Boys Attended_Irreg':'Boys Attended_Irreg',
+                                                            'Total Attended_Irreg':'Total Attended_Irreg',
+                                                            '# of Girls Attended_S_Irreg':'Girls Attended_S_Irreg',
+                                                            '# of Boys Attended_S_Irreg':'Boys Attended_S_Irreg',
+                                                            'Total Attended_S_Irreg':'Total Attended_S_Irreg'
+                                                            })
 
-                    # Pivot Table for the selected variable
-                    st.write("#### Pivot Table of", selected_variable)
-                    if selected_variable == selected_variable:
-                        index_columns = 'Camp/Union'
-                        numeric_columns = selected_df.select_dtypes(include='number').columns
-                        value_columns = st.multiselect("Select value columns for the pivot table", numeric_columns)
-                        if value_columns:
-                            pivot_table = pd.pivot_table(
-                                selected_df,
-                                values=value_columns,
-                                index=[index_columns],
-                                aggfunc='sum',
-                                fill_value=0,
-                                margins=True,
-                                margins_name='Total'
-                            )
+                    pivot_attend_reg = pd.pivot_table(
+                        Attendance,
+                        values=['Girls Attended_Reg',
+                                'Boys Attended_Reg',
+                                'Total Attended_Reg'],
+                        index='Camp',
+                        aggfunc='sum',
+                        fill_value=0,
+                        margins=True,
+                        margins_name='Total')
+                    st.dataframe(pivot_attend_reg,use_container_width=True)
 
-                            st.write(pivot_table)
-                            pivot_table = pivot_table.drop('Total')
-                            st.write("#### Visualization of", selected_variable)
-                            st.bar_chart(pivot_table, height=400)
+                    pivot_attend_Irreg = pd.pivot_table(
+                        Attendance,
+                        values=[
+                                'Girls Attended_Irreg',
+                                'Boys Attended_Irreg',
+                                'Total Attended_Irreg',
+                                ],
+                        index='Camp',
+                        aggfunc='sum',
+                        fill_value=0,
+                        margins=True,
+                        margins_name='Total')
+                    st.dataframe(pivot_attend_Irreg,use_container_width=True)
+
+                    pivot_attend_s_ireg = pd.pivot_table(
+                        Attendance,
+                        values=[
+                                'Girls Attended_S_Irreg',
+                                'Boys Attended_S_Irreg',
+                                'Total Attended_S_Irreg'],
+                        index='Camp',
+                        aggfunc='sum',
+                        fill_value=0,
+                        margins=True,
+                        margins_name='Total')
+                    st.dataframe(pivot_attend_s_ireg,use_container_width=True)
+
+                st.write("## Dropout")
+
+                with st.expander("Show the data"):
+                    # Print interventions associated with dropouts
+                    Dropout = Dropout.rename(columns={'Camp/Union': 'Camp'})
+                    # Replace NaN values with 0 in the dropout columns
+                    Dropout[['Girls_Drop', 'Boys_Drop', 'Total_Drop']] = Dropout[
+                        ['Girls_Drop', 'Boys_Drop', 'Total_Drop']].fillna(0)
+
+                    # Convert to integer to ensure sum calculations work as expected
+                    Dropout[['Girls_Drop', 'Boys_Drop', 'Total_Drop']] = Dropout[
+                        ['Girls_Drop', 'Boys_Drop', 'Total_Drop']].astype(int)
+                    # Display the pivot table
+                    pivot_dropout = pd.pivot_table(
+                        Dropout,
+                        values=[
+                            'Girls_Drop',
+                            'Boys_Drop',
+                            'Total_Drop'
+                        ],
+                        index='Camp',  # Only Camp in the index
+                        aggfunc='sum',
+                        fill_value=0,
+                        margins=True,
+                        margins_name='Total'
+                    )
+                    st.dataframe(pivot_dropout, use_container_width=True)
+                    # Create the pivot table with both Camp and Intervention
+                    pivot_dropout1 = pd.pivot_table(
+                        Dropout,
+                        values=[
+                            'Girls_Drop',
+                            'Boys_Drop',
+                            'Total_Drop'
+                        ],
+                        index=['Camp', 'Intervention'],  # Include Intervention in the index
+                        aggfunc='sum',
+                        fill_value=0,
+                        margins=True,
+                        margins_name='Total'
+                    )
+
+                    # Filter pivot table to find interventions with dropouts
+                    interventions_with_dropouts = pivot_dropout1[pivot_dropout1['Total_Drop'] > 0].reset_index()
+
+                    st.write("### Interventions Associated with Dropouts")
+                    st.dataframe(interventions_with_dropouts[['Camp', 'Intervention', 'Total_Drop']],
+                                 use_container_width=True)
+
+
 
             except Exception as e:
                 st.error(f"Error reading file: {e}")
