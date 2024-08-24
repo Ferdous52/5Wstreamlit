@@ -552,7 +552,7 @@ def app():
                           'RC Female Rohingya Facilitators/ Teachers':'RT_Female',
                           'RC Male Rohingya Facilitators/ Teachers':'RT_Male'})
                      Facilitators['Total'] = Facilitators[['HT_Female','HT_Male','RT_Female','RT_Male']].sum(axis=1)
-                     print(Facilitators.columns)
+
                      pivot_Facilitators = pd.pivot_table(
                         Facilitators,
                         values=[
