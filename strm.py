@@ -173,12 +173,12 @@ def app():
                                   '# of Boys Attended_S_Irreg',
                                   'Total Attended_S_Irreg']]
 
-                Dropout = df1[['Camp/Union', 'Facility Name', 'Facility ID', 'Facility Type', 'Intervention',
+                Dropout = df1[['Camp/Union', 'Facility Name', 'Facility ID', 'Facility Type', 'Intervention','Shift',
                                'Girls_Drop',
                                'Boys_Drop',
                                'Total_Drop']]
 
-                LF_move = df1[['Camp/Union', 'Facility Name', 'Facility ID', 'Facility Type',
+                LF_move = df1[['Camp/Union', 'Facility Name', 'Facility ID', 'Facility Type','Intervention',
                                'Girls_Move_LF',
                                'Boys_Move_LF',
                                'Total_Move_LF']]
@@ -268,6 +268,7 @@ def app():
                         'Learning Centre': 'LC',
                         'Community Based Learning Facility': 'CBLF'
                     })
+
                     pivot_table4 = pd.pivot_table(
                         Facility_info,
                         values='Facility ID',
@@ -278,6 +279,9 @@ def app():
                         margins=True,
                         margins_name='Total'
                     )
+
+
+
                     st.write("### Total Facility Information")
                     st.dataframe(pivot_table4.style.format("{:.0f}"),height=702,use_container_width=True)
 
@@ -285,12 +289,15 @@ def app():
                 st.write("## Enrollment")
 
                 with st.expander("Show the data"):
+
                      Enrollment = Enrollment.rename(columns={'Camp/Union': 'Camp',
                                                              '# of Girls (Including CwD)':'Girls (Including CwD)',
                                                              '# of Girls with Disability':'Girls with Disability',
                                                              '# of Boys (Including CwD)':'Boys (Including CwD)',
                                                              '# of Boys with Disability': 'Boys with Disability'
                                                              })
+                     Enrollment[['Girls (Including CwD)', 'Girls with Disability','Boys (Including CwD)','Boys with Disability','Total']] = Enrollment[
+                         ['Girls (Including CwD)', 'Girls with Disability','Boys (Including CwD)', 'Boys with Disability','Total']].fillna(0)
                      pivot_enroll = pd.pivot_table(
                         Enrollment,
                         values=['Girls (Including CwD)',
@@ -300,10 +307,31 @@ def app():
                                   'Total'],
                         index='Camp',
                         aggfunc='sum',
-                        fill_value=0,
+                        fill_value='NaNs',
                         margins=True,
                         margins_name='Total')
                      st.dataframe(pivot_enroll, height=300)
+
+
+                st.write('## Current_learners')
+                with st.expander('Show the data'):
+                    Current_learners[['Girls','Boys','Total learners']]=Current_learners[['Girls','Boys','Total learners']].fillna(0)
+                    pivot_cl = pd.pivot_table(
+                        Current_learners,
+                        values=[
+                            'Girls',
+                            'Boys',
+                             'Total learners'],
+                        index='Camp/Union',
+                        aggfunc='sum',
+                        fill_value=0,
+                        margins=True,
+                        margins_name='Total')
+                    st.dataframe(pivot_cl, use_container_width=True)
+
+
+
+
 
                 st.write("## Attendance")
 
@@ -318,8 +346,8 @@ def app():
                                                             '# of Girls Attended_S_Irreg':'Girls Attended_S_Irreg',
                                                             '# of Boys Attended_S_Irreg':'Boys Attended_S_Irreg',
                                                             'Total Attended_S_Irreg':'Total Attended_S_Irreg'
-                                                            })
-
+                                                            }).fillna(0)
+                    #Attendance[['Girls Attended_Reg','Boys Attended_Reg','Total Attended_Reg']]=Attendance[['Girls Attended_Reg','Boys Attended_Reg','Total Attended_Reg']].fillna(0)
                     pivot_attend_reg = pd.pivot_table(
                         Attendance,
                         values=['Girls Attended_Reg',
@@ -359,8 +387,25 @@ def app():
                         margins_name='Total')
                     st.dataframe(pivot_attend_s_ireg,use_container_width=True)
 
-                st.write("## Dropout")
 
+                st.write('## Attendance_check')
+                with st.expander('Show the data'):
+                    Attendance_check[['Girls_check', 'Boys_Check']] = Attendance_check[
+                        ['Girls_check', 'Boys_Check']].fillna(0)
+                    pivot_ac = pd.pivot_table(
+                        Attendance_check,
+                        values=[
+                            'Girls_check',
+                            'Boys_Check'],
+                        index='Camp/Union',
+                        aggfunc='sum',
+                        fill_value=0,
+                        margins=True,
+                        margins_name='Total')
+                    st.dataframe(pivot_ac, use_container_width=True)
+
+
+                st.write("## Dropout")
                 with st.expander("Show the data"):
                     # Print interventions associated with dropouts
                     Dropout = Dropout.rename(columns={'Camp/Union': 'Camp'})
@@ -394,7 +439,7 @@ def app():
                             'Boys_Drop',
                             'Total_Drop'
                         ],
-                        index=['Camp', 'Intervention'],  # Include Intervention in the index
+                        index=['Camp', 'Intervention','Facility Name','Facility ID', 'Facility Type','Shift'],  # Include Intervention in the index
                         aggfunc='sum',
                         fill_value=0,
                         margins=True,
@@ -403,10 +448,124 @@ def app():
 
                     # Filter pivot table to find interventions with dropouts
                     interventions_with_dropouts = pivot_dropout1[pivot_dropout1['Total_Drop'] > 0].reset_index()
+                    #'Facility Name', 'Facility ID', 'Facility Type','Shift'
+                    st.write("#### Interventions Associated with Dropouts")
+                    st.dataframe(interventions_with_dropouts[['Camp', 'Facility Name','Intervention', 'Facility ID', 'Facility Type','Shift','Total_Drop']],use_container_width=True)
 
-                    st.write("### Interventions Associated with Dropouts")
-                    st.dataframe(interventions_with_dropouts[['Camp', 'Intervention', 'Total_Drop']],
-                                 use_container_width=True)
+
+                st.write('## LF_Move')
+                with st.expander('Show the data'):
+                     pivot_LFmove1 = pd.pivot_table(
+                         LF_move,
+                         values=[
+                               'Girls_Move_LF',
+                               'Boys_Move_LF',
+                               'Total_Move_LF'],
+                         index='Camp/Union',
+                         aggfunc='sum',
+                         fill_value=0,
+                         margins=True,
+                         margins_name='Total')
+
+                     st.dataframe(pivot_LFmove1,use_container_width=True)
+
+                     pivot_LFmove2 = pd.pivot_table(
+                         LF_move,
+                         values=[
+                             'Girls_Move_LF',
+                             'Boys_Move_LF',
+                             'Total_Move_LF'],
+                         index=['Camp/Union','Intervention'],
+                         aggfunc='sum',
+                         fill_value=0,
+                         margins=True,
+                         margins_name='Total')
+                     LF_move_associated = pivot_LFmove2[pivot_LFmove2['Total_Move_LF'] > 0].reset_index()
+                     st.dataframe(LF_move_associated[['Camp/Union','Intervention','Total_Move_LF']],use_container_width=True)
+
+                st.write('## Camp_Move')
+                with st.expander('Show the data'):
+                    pivot_Camp_move = pd.pivot_table(
+                        Camp_move,
+                        values=[
+                            'Girls_Move_Camp',
+                            'Boys_Move_Camp',
+                            'Total_Move_Camp'],
+                        index='Camp/Union',
+                        aggfunc='sum',
+                        fill_value=0,
+                        margins=True,
+                        margins_name='Total')
+
+                    st.dataframe(pivot_Camp_move, use_container_width=True)
+
+
+
+                st.write('## Phv')
+                with st.expander('Show the data'):
+                     pivot_phv = pd.pivot_table(
+                        phv,
+                        values=[
+                            'Girls_PhV',
+                            'Boys_PhV',
+                            'Total_PhV'],
+                        index='Camp/Union',
+                        aggfunc='sum',
+                        fill_value=0,
+                        margins=True,
+                        margins_name='Total')
+
+                     st.dataframe(pivot_phv, use_container_width=True)
+
+
+                st.write('## Facilitators')
+                with st.expander('Show the data'):
+                     pivot_Facilitators = pd.pivot_table(
+                        Facilitators,
+                        values=[
+                            'HC Female Teachers/ Facilitators',
+                            'HC Male Teachers/ Facilitators',
+                            'RC Female Rohingya Facilitators/ Teachers',
+                            'RC Male Rohingya Facilitators/ Teachers'],
+                        index='Camp/Union',
+                        aggfunc='sum',
+                        fill_value=0,
+                        margins=True,
+                        margins_name='Total')
+                     st.dataframe(pivot_Facilitators, use_container_width=True)
+
+                st.write('## Volunteers')
+                with st.expander('Show the data'):
+                    pivot_Volunteers = pd.pivot_table(
+                        Volunteers,
+                        values=[
+                            'HC Female Volunteers/ Guards',
+                            'HC Male Volunteers/ Guards',
+                            'RC Female Volunteers/ Guards',
+                            'RC Male Volunteers/ Guards'],
+                        index='Camp/Union',
+                        aggfunc='sum',
+                        fill_value=0,
+                        margins=True,
+                        margins_name='Total')
+                    st.dataframe(pivot_Volunteers, use_container_width=True)
+
+                    st.write('## CWD')
+                    with st.expander('Show the data'):
+                        pivot_cwd = pd.pivot_table(
+                            cwd,
+                            values=[
+                                'Girls_CwD',
+                                'Boys_CwD',
+                                'Total_CwD'],
+                            index='Camp/Union',
+                            aggfunc='sum',
+                            fill_value=0,
+                            margins=True,
+                            margins_name='Total')
+                        st.dataframe(pivot_cwd, use_container_width=True)
+
+
 
 
 
