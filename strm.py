@@ -287,16 +287,20 @@ def app():
                 st.write("## Enrollment")
 
                 with st.expander("Show the data"):
+                      Enrollment['Facility Type'] = Enrollment['Facility Type'].replace({
+                            'Learning Centre': 'LC',
+                            'Community Based Learning Facility': 'CBLF'})
 
-                     Enrollment = Enrollment.rename(columns={'Camp/Union': 'Camp',
+
+                      Enrollment = Enrollment.rename(columns={'Camp/Union': 'Camp',
                                                              '# of Girls (Including CwD)':'Girls (Including CwD)',
                                                              '# of Girls with Disability':'Girls with Disability',
                                                              '# of Boys (Including CwD)':'Boys (Including CwD)',
                                                              '# of Boys with Disability': 'Boys with Disability'
                                                              })
-                     Enrollment[['Girls (Including CwD)', 'Girls with Disability','Boys (Including CwD)','Boys with Disability','Total']] = Enrollment[
+                      Enrollment[['Girls (Including CwD)', 'Girls with Disability','Boys (Including CwD)','Boys with Disability','Total']] = Enrollment[
                          ['Girls (Including CwD)', 'Girls with Disability','Boys (Including CwD)', 'Boys with Disability','Total']].fillna(0)
-                     pivot_enroll = pd.pivot_table(
+                      pivot_enroll = pd.pivot_table(
                         Enrollment,
                         values=['Girls (Including CwD)',
                                   'Girls with Disability',
@@ -308,9 +312,9 @@ def app():
                         fill_value='NaNs',
                         margins=True,
                         margins_name='Total')
-                     st.dataframe(pivot_enroll, height=290)
+                      st.dataframe(pivot_enroll, height=290,use_container_width=True)
 
-                     pivot_enroll2 = pd.pivot_table(
+                      pivot_enroll2 = pd.pivot_table(
                          Enrollment,
                          values=['Girls (Including CwD)',
                                  'Girls with Disability',
@@ -322,7 +326,7 @@ def app():
                          fill_value='0',
                          margins=True,
                          margins_name='Total')
-                     st.dataframe(pivot_enroll2, height=705)
+                      st.dataframe(pivot_enroll2, height=705,use_container_width=True)
 
 
                 st.write('## Current_learners')
@@ -358,8 +362,9 @@ def app():
                                                             '# of Girls Attended_S_Irreg':'Girls Attended_S_Irreg',
                                                             '# of Boys Attended_S_Irreg':'Boys Attended_S_Irreg',
                                                             'Total Attended_S_Irreg':'Total Attended_S_Irreg'
-                                                            }).fillna(0)
-                    #Attendance[['Girls Attended_Reg','Boys Attended_Reg','Total Attended_Reg']]=Attendance[['Girls Attended_Reg','Boys Attended_Reg','Total Attended_Reg']].fillna(0)
+                                                            })
+                    Attendance[['Girls Attended_Reg','Boys Attended_Reg','Total Attended_Reg']]=Attendance[['Girls Attended_Reg','Boys Attended_Reg','Total Attended_Reg']].fillna(0)
+                    st.text('Regular Attendance(above 80 %)')
                     pivot_attend_reg = pd.pivot_table(
                         Attendance,
                         values=['Girls Attended_Reg',
@@ -372,6 +377,7 @@ def app():
                         margins_name='Total')
                     st.dataframe(pivot_attend_reg,use_container_width=True)
 
+                    st.text('Irregular Attendance (51% to 79%)')
                     pivot_attend_Irreg = pd.pivot_table(
                         Attendance,
                         values=[
@@ -386,6 +392,7 @@ def app():
                         margins_name='Total')
                     st.dataframe(pivot_attend_Irreg,use_container_width=True)
 
+                    st.text('Severe Irregular Attendance(<50%)')
                     pivot_attend_s_ireg = pd.pivot_table(
                         Attendance,
                         values=[
@@ -532,18 +539,34 @@ def app():
 
                 st.write('## Facilitators')
                 with st.expander('Show the data'):
+                     Facilitators[['HC Female Teachers/ Facilitators',
+                            'HC Male Teachers/ Facilitators',
+                            'RC Female Rohingya Facilitators/ Teachers',
+                            'RC Male Rohingya Facilitators/ Teachers']] =Facilitators[['HC Female Teachers/ Facilitators',
+                            'HC Male Teachers/ Facilitators',
+                            'RC Female Rohingya Facilitators/ Teachers',
+                            'RC Male Rohingya Facilitators/ Teachers']].fillna(0)
+                     Facilitators = Facilitators.rename(columns=
+                         {'HC Female Teachers/ Facilitators':'HT_Female',
+                          'HC Male Teachers/ Facilitators':'HT_Male',
+                          'RC Female Rohingya Facilitators/ Teachers':'RT_Female',
+                          'RC Male Rohingya Facilitators/ Teachers':'RT_Male'})
+                     Facilitators['Total'] = Facilitators[['HT_Female','HT_Male','RT_Female','RT_Male']].sum(axis=1)
+                     print(Facilitators.columns)
                      pivot_Facilitators = pd.pivot_table(
                         Facilitators,
                         values=[
-                            'HC Female Teachers/ Facilitators',
-                            'HC Male Teachers/ Facilitators',
-                            'RC Female Rohingya Facilitators/ Teachers',
-                            'RC Male Rohingya Facilitators/ Teachers'],
+                            'HT_Female',
+                            'HT_Male',
+                            'RT_Female',
+                            'RT_Male',
+                            'Total'],
                         index='Camp/Union',
                         aggfunc='sum',
                         fill_value=0,
                         margins=True,
                         margins_name='Total')
+
                      st.dataframe(pivot_Facilitators, use_container_width=True)
 
                 st.write('## Volunteers')
