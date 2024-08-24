@@ -1,8 +1,8 @@
 import streamlit as st
 import pandas as pd
-#from st_aggrid import AgGrid as ag
 
-st.set_page_config()
+
+st.set_page_config(page_title="5W")
 
 # Initialize session state for login
 if 'logged_in' not in st.session_state:
@@ -51,10 +51,8 @@ def login():
 
     st.markdown('<div class="login-title">Login</div>', unsafe_allow_html=True)
 
-    username = st.text_input("Username", placeholder="Enter your username", key="username",
-                             label_visibility="collapsed", help="Enter your username here")
-    password = st.text_input("Password", type="password", placeholder="Enter your password", key="password",
-                             label_visibility="collapsed", help="Enter your password here")
+    username = st.text_input("Username", placeholder="Enter your username", key="username",label_visibility="collapsed", help="Enter your username here")
+    password = st.text_input("Password", type="password", placeholder="Enter your password", key="password",label_visibility="collapsed", help="Enter your password here")
 
     if st.button("Login", help="Click to login", use_container_width=True, key="login_button"):
         if username == "dipu" and password == "2580":
@@ -310,7 +308,21 @@ def app():
                         fill_value='NaNs',
                         margins=True,
                         margins_name='Total')
-                     st.dataframe(pivot_enroll, height=300)
+                     st.dataframe(pivot_enroll, height=290)
+
+                     pivot_enroll2 = pd.pivot_table(
+                         Enrollment,
+                         values=['Girls (Including CwD)',
+                                 'Girls with Disability',
+                                 'Boys (Including CwD)',
+                                 'Boys with Disability',
+                                 'Total'],
+                         index=['Facility Type','Intervention'],
+                         aggfunc='sum',
+                         fill_value='0',
+                         margins=True,
+                         margins_name='Total')
+                     st.dataframe(pivot_enroll2, height=705)
 
 
                 st.write('## Current_learners')
