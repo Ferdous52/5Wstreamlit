@@ -55,7 +55,7 @@ def login():
     password = st.text_input("Password", type="password", placeholder="Enter your password", key="password",label_visibility="collapsed", help="Enter your password here")
 
     if st.button("Login", help="Click to login", use_container_width=True, key="login_button"):
-        if username == "dipu" and password == "2580":
+        if username == "dipu" and password == "01516":
             st.session_state.logged_in = True
         else:
             st.error("Invalid username or password. Please try again.")
@@ -81,8 +81,6 @@ def app():
 
     if option == "5W data Comparison":
         st.write("## 5W Data Comparison")
-
-
 
         # File uploader for two Excel files
         file1 = st.file_uploader("Upload the Previous Month 5W data file", type=["xlsx"], key="file1")
@@ -127,7 +125,6 @@ def app():
                     st.dataframe(diff_df)
                 else:
                     st.write("No differences found in the numeric enrollment data.")
-
 
             except Exception as e:
                 st.error(f"Error reading files: {e}")
@@ -235,7 +232,7 @@ def app():
                 st.write("## Facility Information")
                 with st.expander("Show the data"):
                     #st.dataframe(Facility_info)
-
+                    st.text('Camp-wise Facility Type')
                     # Pivot Table1  Section
                     pivot_table1 = pd.pivot_table(
                         Facility_info,
@@ -249,7 +246,7 @@ def app():
                     st.dataframe(pivot_table1.style.format("{:.0f}"),use_container_width=True)
 
                     # Pivot Table3  Section
-                    st.write("#### Number of Facility  wise Intervention")
+                    st.text("Intervention-wise Facility")
                     pivot_table3 = pd.pivot_table(
                         Facility_info,
                         values='Facility ID',
@@ -278,9 +275,7 @@ def app():
                         margins_name='Total'
                     )
 
-
-
-                    st.write("### Total Facility Information")
+                    st.text("Total Facility Information")
                     st.dataframe(pivot_table4.style.format("{:.0f}"),height=702,use_container_width=True)
 
 
@@ -344,10 +339,6 @@ def app():
                         margins=True,
                         margins_name='Total')
                     st.dataframe(pivot_cl, use_container_width=True)
-
-
-
-
 
                 st.write("## Attendance")
 
@@ -518,8 +509,6 @@ def app():
 
                     st.dataframe(pivot_Camp_move, use_container_width=True)
 
-
-
                 st.write('## Phv')
                 with st.expander('Show the data'):
                      pivot_phv = pd.pivot_table(
@@ -599,10 +588,6 @@ def app():
                             margins=True,
                             margins_name='Total')
                         st.dataframe(pivot_cwd, use_container_width=True)
-
-
-
-
 
             except Exception as e:
                 st.error(f"Error reading file: {e}")
