@@ -528,18 +528,18 @@ def app():
 
                 st.write('## Facilitators')
                 with st.expander('Show the data'):
-                     Facilitators[['HC Female Teachers/ Facilitators',
-                            'HC Male Teachers/ Facilitators',
-                            'RC Female Rohingya Facilitators/ Teachers',
-                            'RC Male Rohingya Facilitators/ Teachers']] =Facilitators[['HC Female Teachers/ Facilitators',
-                            'HC Male Teachers/ Facilitators',
-                            'RC Female Rohingya Facilitators/ Teachers',
-                            'RC Male Rohingya Facilitators/ Teachers']].fillna(0)
+                     Facilitators[['HC Female_TV',
+                            'HC Male_TV',
+                            'RC Female_TV',
+                            'RC Male_TV']] =Facilitators[['HC Female_TV',
+                            'HC Male_TV',
+                            'RC Female_TV',
+                            'RC Male_TV']].fillna(0)
                      Facilitators = Facilitators.rename(columns=
-                         {'HC Female Teachers/ Facilitators':'HT_Female',
-                          'HC Male Teachers/ Facilitators':'HT_Male',
-                          'RC Female Rohingya Facilitators/ Teachers':'RT_Female',
-                          'RC Male Rohingya Facilitators/ Teachers':'RT_Male'})
+                         {'HC Female_TV':'HT_Female',
+                          'HC Male_TV':'HT_Male',
+                          'RC Female_TV':'RT_Female',
+                          'RC Male_TV':'RT_Male'})
                      Facilitators['Total'] = Facilitators[['HT_Female','HT_Male','RT_Female','RT_Male']].sum(axis=1)
 
                      pivot_Facilitators = pd.pivot_table(
