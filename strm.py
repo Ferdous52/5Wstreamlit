@@ -188,10 +188,10 @@ def app():
                            'Total_PhV']]
 
                 Facilitators = df1[['Camp/Union', 'Facility Name', 'Facility ID', 'Facility Type',
-                                    'HC Female Teachers/ Facilitators',
-                                    'HC Male Teachers/ Facilitators',
-                                    'RC Female Rohingya Facilitators/ Teachers',
-                                    'RC Male Rohingya Facilitators/ Teachers']]
+                                    'HC Female_TV',
+                                    'HC Male_TV',
+                                    'RC Female_TV',
+                                    'RC Male_TV']]
 
                 Volunteers = df1[['Camp/Union', 'Facility Name', 'Facility ID', 'Facility Type',
                                   'HC Female Volunteers/ Guards',
